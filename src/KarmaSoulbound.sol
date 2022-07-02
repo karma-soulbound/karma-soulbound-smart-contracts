@@ -38,7 +38,10 @@ contract KarmaSoulbound is ERC721Enumerable, Ownable {
     }
 
     function burnKarma(uint256 tokenId) public onlyOwner {
+        address bearer = ownerOf(tokenId);
+        int256 karma = karmaBalance[bearer].score;
         _burn(tokenId);
+        emit KarmaForgiven(bearer, tokenId, karma);
     }
 
     function tokenURI(uint256 tokenId)
@@ -91,9 +94,14 @@ contract KarmaSoulbound is ERC721Enumerable, Ownable {
     }
     function grantForgiveness(uint256 _forgiveRequestId) public onlyOwner {
         uint256 tokenId = forgiveRequestId[_forgiveRequestId];
+        int256 karma = karmaBalance[tokenId];
+        address bearer = ownerOf(tokenId);
+        karmaBalance[bearer] -= karma;
         require(tokenId != 0);
         _burn(tokenId);
+        emit KarmaForgiven(bearer, tokenId, karma);
     }
 
-    event RequestForForgiveness(address indexed bearer, uint256 tokenId, uint256 forgiveId);
+    event RequestForForgiveness(address indexed bearer, uint256 tokenId, int256 karma);
+    event KarmaForgiven(address indexed bearer, uint256 tokenId, int256 karma);
 }
