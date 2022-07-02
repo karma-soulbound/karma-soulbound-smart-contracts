@@ -5,30 +5,34 @@ import "openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 import "openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
 import "./libraries/NFTDescriptor.sol";
+import "./libraries/IntToUint.sol";
 
 error CanNotTransfer();
+error NotTokenOwner();
 
 contract KarmaSoulbound is ERC721Enumerable, Ownable {
-    uint256 lastId;
-
+    uint256 lastId = 0;
+    uint256 lastForgiveId = 0;
     mapping(uint256 => Karma) public karmaData;
-
+    mapping(address => int256) public karmaBalance;
     struct Karma {
-        string score;
+        int256 score;
         string description;
     }
+    mapping(uint256 => uint256) public forgiveRequestId;
 
     constructor() ERC721("Karma Soulbound", "Karma") {}
 
     function mintKarma(
         address _to,
-        string memory _score,
-        string memory _description
+        int256  _score,
+        string calldata _description
     ) public onlyOwner {
         karmaData[lastId + 1] = Karma({
             score: _score,
             description: _description
         });
+        karmaBalance[_to] += _score;
         _safeMint(_to, lastId + 1);
         lastId += 1;
     }
@@ -45,7 +49,7 @@ contract KarmaSoulbound is ERC721Enumerable, Ownable {
             NFTDescriptor.generateTokenURI(
                 "Test",
                 "Test Description",
-                token.score,
+                IntToUint.toString(token.score),
                 token.description
             );
     }
@@ -66,4 +70,23 @@ contract KarmaSoulbound is ERC721Enumerable, Ownable {
         }
         revert CanNotTransfer();
     }
+
+    function forgiveRequest(uint256 _tokenId) public {
+        _exists(_tokenId);
+        if(ownerOf(_tokenId) != _msgSender()) {
+            revert NotTokenOwner();
+        }
+        else {
+            forgiveRequestId[lastForgiveId + 1] = _tokenId;
+            emit RequestForForgiveness(_msgSender(), _tokenId, lastForgiveId + 1);
+            lastForgiveId += 1;
+        }
+    }
+    function grantForgiveness(uint256 _forgiveRequestId) public onlyOwner {
+        uint256 tokenId = forgiveRequestId[_forgiveRequestId];
+        require(tokenId != 0);
+        _burn(tokenId);
+    }
+
+    event RequestForForgiveness(address indexed bearer, uint256 tokenId, uint256 forgiveId);
 }
