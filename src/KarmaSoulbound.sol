@@ -33,6 +33,10 @@ contract KarmaSoulbound is ERC721Enumerable, Ownable {
         lastId += 1;
     }
 
+    function burnKarma(uint256 tokenId) public onlyOwner {
+        _burn(tokenId);
+    }
+
     function tokenURI(uint256 tokenId)
         public
         view
@@ -62,6 +66,9 @@ contract KarmaSoulbound is ERC721Enumerable, Ownable {
         super._beforeTokenTransfer(from, to, tokenId);
         // Ignore transfers during minting
         if (from == address(0)) {
+            return;
+        }
+        if (to == address(0) && msg.sender == owner()) {
             return;
         }
         revert CanNotTransfer();
