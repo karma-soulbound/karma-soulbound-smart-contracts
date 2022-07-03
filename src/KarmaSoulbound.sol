@@ -102,6 +102,6 @@ contract KarmaSoulbound is ERC721Enumerable, Ownable {
         emit KarmaForgiven(bearer, tokenId, karma);
     }
 
-    event RequestForForgiveness(address indexed bearer, uint256 tokenId, int256 karma);
+    event RequestForForgiveness(address indexed bearer, uint256 tokenId, uint256 forgiveId);
     event KarmaForgiven(address indexed bearer, uint256 tokenId, int256 karma);
 }
