@@ -15,26 +15,26 @@ contract KarmaSoulboundTest is Test {
 
     function testMintKarmaAsOwner() public {
         assertEq(karmaSoulbound.balanceOf(alice), 0);
-        karmaSoulbound.mintKarma(alice, "-1", "Steal");
+        karmaSoulbound.mintKarma(alice, -1, "Steal");
         assertEq(karmaSoulbound.balanceOf(alice), 1);
     }
 
     function testFailMintKarmaAsNotOwner() public {
         vm.expectRevert();
         vm.prank(address(alice));
-        karmaSoulbound.mintKarma(alice, "-1", "Steal");
+        karmaSoulbound.mintKarma(alice, -1, "Steal");
     }
 
     function testBurnKarmaAsOwner() public {
         assertEq(karmaSoulbound.balanceOf(alice), 0);
-        karmaSoulbound.mintKarma(alice, "-1", "Steal");
+        karmaSoulbound.mintKarma(alice, -1, "Steal");
         assertEq(karmaSoulbound.balanceOf(alice), 1);
         karmaSoulbound.burnKarma(1);
         assertEq(karmaSoulbound.balanceOf(alice), 0);
     }
 
     function testFailBurnKarmaAsNotOwner() public {
-        karmaSoulbound.mintKarma(alice, "-1", "Steal");
+        karmaSoulbound.mintKarma(alice, -1, "Steal");
         assertEq(karmaSoulbound.balanceOf(alice), 1);
         vm.expectRevert();
         vm.prank(address(alice));
